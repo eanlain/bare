@@ -14,19 +14,18 @@ module Bare
 
         request = Net::HTTP::Post.new(uri.request_uri)
         request.set_form_data(parameters)
+        
         response = http.request(request)
         cookie = response.response['set-cookie']
         self.cookie = cookie
+
         return cookie
       end
 
       def get(url, parameters={}, https=false, cookie=self.cookie)
         reset_attr
         full_url = url
-
-        if !parameters.empty?
-          full_url += "?"
-        end
+        full_url += "?" unless parameters.empty?
 
         parameters.each_with_index do |(k,v), index|
           if index == 0
@@ -40,9 +39,7 @@ module Bare
 
         request = Net::HTTP::Get.new(uri.request_uri)
 
-        if !cookie.nil?
-          request['Cookie'] = cookie
-        end
+        request['Cookie'] = cookie unless cookie.nil?
 
         set_attr(http.request(request))
         return self.response
@@ -55,9 +52,7 @@ module Bare
         request = Net::HTTP::Post.new(uri.request_uri)
         request.set_form_data(parameters)
 
-        if !cookie.nil?
-          request['Cookie'] = cookie
-        end
+        request['Cookie'] = cookie unless cookie.nil?
 
         set_attr(http.request(request))
         return self.response
@@ -70,25 +65,27 @@ module Bare
         request = Net::HTTP::Put.new(uri.request_uri)
         request.set_form_data(parameters)
 
-        if !cookie.nil?
-          request['Cookie'] = cookie
-        end
+        request['Cookie'] = cookie unless cookie.nil?
 
         set_attr(http.request(request))
         return self.response
       end
 
-      def delete(url, https=false, cookie=self.cookie)
+      def delete(url, parameters={}, https=false, cookie=self.cookie)
         reset_attr
         uri, http = setupHttp(url, https)
 
         request = Net::HTTP::Delete.new(uri.request_uri)
+        request.set_form_data(parameters)
+
+        request['Cookie'] = cookie unless cookie.nil?
 
         set_attr(http.request(request))
         return self.response
       end
 
     protected
+
       def reset_attr
         self.body = nil
         self.code = nil
